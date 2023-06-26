@@ -7,12 +7,16 @@
 class mainwindow : public QMainWindow
 {
     Q_OBJECT
-
+        
 public:
     mainwindow(QWidget *parent = nullptr);
     ~mainwindow();
 
     void InitChatServer();
+
+    void onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf);
+
+    void ShowMsg(const QString& str);
 
 private:
     Ui::mainwindowClass ui;

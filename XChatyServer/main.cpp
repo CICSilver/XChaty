@@ -22,7 +22,6 @@ int main(int argc, char* argv[]) {
     int listenfd = srv.createsocket(port);
     if (listenfd < 0) {
         printf("listenfd:%d < 0", listenfd);
-        system("Pause");
         return -20;
     }
     printf("server listen on port %d, listenfd=%d ...\n", port, listenfd);

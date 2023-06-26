@@ -8,3 +8,5 @@
 /out
 /XChatyServer/Debug
 *.log
+*.stash
+/XChatyUtilty/Debug/qmake
