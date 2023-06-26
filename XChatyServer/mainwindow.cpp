@@ -38,11 +38,5 @@ void mainwindow::InitChatServer()
 void mainwindow::onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf)
 {
 	// echo
-	printf("< %.*s\n", (int)buf->size(), (char*)buf->data());
-	channel->write(buf);
-}
-
-void mainwindow::ShowMsg(const QString& str)
-{
-
+	
 }

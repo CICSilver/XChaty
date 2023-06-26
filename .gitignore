@@ -10,3 +10,4 @@
 *.log
 *.stash
 /XChatyUtilty/Debug/qmake
+/XChatyUtilty/Debug

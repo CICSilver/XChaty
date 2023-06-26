@@ -16,8 +16,6 @@ public:
 
     void onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf);
 
-    void ShowMsg(const QString& str);
-
 private:
     Ui::mainwindowClass ui;
     hv::TcpServer* m_server;
