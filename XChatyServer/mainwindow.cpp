@@ -6,7 +6,7 @@ mainwindow::mainwindow(QWidget *parent)
     ui.setupUi(this);
     m_server = nullptr;
 
-    connect(ui.startBtn, QPushButton::clicked, this, [this]()
+    connect(ui.startBtn, &QPushButton::clicked, this, [this]()
         {
             QString port = ui.portEdit->text();
             if (port.isEmpty())

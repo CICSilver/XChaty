@@ -11,3 +11,5 @@
 *.stash
 /XChatyUtilty/Debug/qmake
 /XChatyUtilty/Debug
+/XChatyServer/Debug
+/XChatyServer/DebugWin32

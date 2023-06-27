@@ -56,7 +56,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Win32'">
-    <OutDir>$(SolutionDir)\out</OutDir>
+    <OutDir>$(SolutionDir)out\</OutDir>
     <ExternalIncludePath>$(MSBuildProjectDirectory)\..\dependency\Win32\libhv\include;$(ExternalIncludePath)</ExternalIncludePath>
     <ReferencePath>$(MSBuildProjectDirectory)\..\dependency\Win32\libhv\lib;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
