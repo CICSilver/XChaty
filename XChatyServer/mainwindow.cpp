@@ -1,6 +1,7 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "chatwindowutilty.h"
 #include "customevent.h"
+#include "htime.h"
 #include <QMessageBox>
 #include <QDebug>
 #include <QDateTime>
@@ -48,11 +49,19 @@ void mainwindow::InitChatServer()
     {
 		onMsg(channel, buf);
 	};
+    
 }
 
 void mainwindow::onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf)
 {
     QString recvMsg = QString::fromLocal8Bit((char*)buf->data(), buf->size());
+    if (recvMsg.size() == 1 && recvMsg.at(0) == 'h')
+    {
+        // 心跳包
+        channel->write("s");
+        return;
+    }
+    
     m_chatHelper->PostMsg(this, recvMsg);
     // echo
      m_server->broadcast(recvMsg.toStdString());
@@ -61,6 +70,8 @@ void mainwindow::onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf)
 void mainwindow::onConnection(const hv::SocketChannelPtr& channel)
 {
     QString state = channel->isConnected() ? "connected" : "disconnected";
+    // 设置超时时间
+    channel->setKeepaliveTimeout(60000);
     m_chatHelper->PostMsg(this, QString("[Server] conn id: %1 %2")
         .arg(channel->id())
         .arg(state));

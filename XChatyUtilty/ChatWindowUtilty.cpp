@@ -1,4 +1,4 @@
-#include "chatwindowutilty.h"
+﻿#include "chatwindowutilty.h"
 #include"customevent.h"
 #include <QDateTime>
 #include <QApplication>

@@ -1,10 +1,11 @@
-#include "xchatyclient.h"
+﻿#include "xchatyclient.h"
+#include "loginwindow.h"
 #include <QtWidgets/QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    XChatyClient w;
+    LoginWindow w;
     w.show();
     return a.exec();
 }

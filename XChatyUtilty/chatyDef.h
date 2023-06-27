@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 #include "xchatyutilty_global.h"
 #include <QString>
-typedef struct XCHATYUTILTY_EXPORT UserStruct
+typedef struct UserStruct
 {
 	QString userName;
 	QString passwd;
