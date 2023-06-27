@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9545BBEC-4E56-46F7-8E9E-6BA20DC93459}</ProjectGuid>
+    <ProjectGuid>{01E3D343-B99F-4059-B1EA-D652946AC6D3}</ProjectGuid>
     <Keyword>QtVS_v304</Keyword>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|Win32'">10.0.22000.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|Win32'">10.0.22000.0</WindowsTargetPlatformVersion>
@@ -19,11 +19,11 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -32,12 +32,12 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Win32'" Label="QtSettings">
     <QtInstall>5.13.1</QtInstall>
-    <QtModules>core;widgets</QtModules>
+    <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Win32'" Label="QtSettings">
     <QtInstall>5.13.1</QtInstall>
-    <QtModules>core</QtModules>
+    <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -55,22 +55,18 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Win32'">
-    <IncludePath>$(MSBuildProjectDirectory)\..\dependency\Win32\libhv\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(MSBuildProjectDirectory)\..\dependency\Win32\libhv\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)out\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Win32'">
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Link>
-      <AdditionalDependencies>hv.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
-      <ImportLibrary>$(OutDir)lib\$(TargetName).lib</ImportLibrary>
-      <AdditionalLibraryDirectories>$(MSBuildProjectDirectory)\..\dependency\Win32\libhv\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\..\dependency\Win32\libhv\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\..\dependency\Win32\libhv\include;..\XChatyUtilty\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(MSBuildProjectDirectory)\..\dependency\Win32\libhv\lib;$(OutDir)lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>hv.lib;XChatyUtilty.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Win32'" Label="Configuration">
     <ClCompile>
@@ -78,7 +74,6 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>XCHATYUTILTY_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -91,7 +86,6 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>MaxSpeed</Optimization>
-      <PreprocessorDefinitions>XCHATYUTILTY_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -99,13 +93,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="customevent.h" />
-    <ClInclude Include="chatyDef.h" />
-    <ClInclude Include="xchatyutilty_global.h" />
-    <ClInclude Include="chatwindowutilty.h" />
+    <QtRcc Include="xchatyclient.qrc" />
+    <QtUic Include="loginwindow.ui" />
+    <QtUic Include="xchatyclient.ui" />
+    <QtMoc Include="xchatyclient.h" />
+    <ClCompile Include="loginwindow.cpp" />
+    <ClCompile Include="xchatyclient.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="chatwindowutilty.cpp" />
+    <QtMoc Include="loginwindow.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

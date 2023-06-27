@@ -1,24 +1,39 @@
-#include "ChatWindowUtilty.h"
+#include "chatwindowutilty.h"
+#include"customevent.h"
 #include <QDateTime>
-void ChatWindowUtilty::ShowMsg(QTextEdit* textWidget, const QString& str)
+#include <QApplication>
+void ChatWindowUtilty::ShowMsg(const QString& str)
 {
-	textWidget->setText(str);
-	textWidget->repaint();
+	QString newStr(str);
+	checkAndAddLineBreak(newStr);
+	m_chatEdit->setText(newStr);
+	m_chatEdit->repaint();
 }
 
-void ChatWindowUtilty::AppendMsg(QTextEdit* textWidget, const QString& str)
+void ChatWindowUtilty::AppendMsg(const QString& str)
 {
 	// "....\n...\n...\n"
-	QString chatContent = textWidget->toPlainText();
-	chatContent = chatContent 
+	QString chatContent = m_chatEdit->toPlainText();
+	chatContent = chatContent
 		+ QDateTime::currentDateTime().toString("[yyyy-MM-dd hh:mm:ss.zzz] ")
 		+ str;
-	if (chatContent.back() != "\n")
-		chatContent.append("\n");
-	ShowMsg(textWidget, chatContent);
+	
+	ShowMsg(chatContent);
 }
 
-void ChatWindowUtilty::ClearMsg(QTextEdit* textWidget, const QString& str)
+void ChatWindowUtilty::ClearMsg()
 {
-	textWidget->clear();
+	m_chatEdit->clear();
+}
+
+void ChatWindowUtilty::OverWriteMsg(const QString& str)
+{
+	ClearMsg();
+	ShowMsg(str);
+}
+
+void ChatWindowUtilty::PostMsg(QObject* reciver, const QString& str)
+{
+	QStringEvent* event = new QStringEvent(str);
+	QApplication::postEvent(reciver, event);
 }

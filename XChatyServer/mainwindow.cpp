@@ -1,27 +1,34 @@
 #include "mainwindow.h"
+#include "chatwindowutilty.h"
+#include "customevent.h"
 #include <QMessageBox>
+#include <QDebug>
+#include <QDateTime>
+#include <qeventloop.h>
 mainwindow::mainwindow(QWidget *parent)
     : QMainWindow(parent)
 {
     ui.setupUi(this);
     m_server = nullptr;
-
+    m_chatHelper = ChatWindowUtilty::GetInstance(ui.chatEdit);
+    InitChatServer();
     connect(ui.startBtn, &QPushButton::clicked, this, [this]()
         {
             QString port = ui.portEdit->text();
             if (port.isEmpty())
             {
-                QMessageBox::critical(this, "Error", "Port is empty!");
+                m_chatHelper->AppendMsg("Port is empty!");
                 return;
             }
             int listenfd = m_server->createsocket(port.toInt());
             if (listenfd < 0)
             {
-				QMessageBox::critical(this, "Error", "Listen failed!");
+				m_chatHelper->AppendMsg("Create socket failed!");
 				return;
 			}
-
-
+            m_server->setThreadNum(1);
+            m_server->start();
+            m_chatHelper->OverWriteMsg(QString("Listening on port: %1").arg(port));
         });
 }
 
@@ -32,11 +39,47 @@ mainwindow::~mainwindow()
 
 void mainwindow::InitChatServer()
 {
-    
+    m_server = new hv::TcpServer();
+    m_server->onConnection = [this](const hv::SocketChannelPtr& channel)
+    {
+		onConnection(channel);
+	};
+    m_server->onMessage = [this](const hv::SocketChannelPtr& channel, hv::Buffer* buf)
+    {
+		onMsg(channel, buf);
+	};
 }
 
 void mainwindow::onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf)
 {
-	// echo
-	
+    QString recvMsg = QString::fromLocal8Bit((char*)buf->data(), buf->size());
+    m_chatHelper->PostMsg(this, recvMsg);
+    // echo
+     m_server->broadcast(recvMsg.toStdString());
+}
+
+void mainwindow::onConnection(const hv::SocketChannelPtr& channel)
+{
+    QString state = channel->isConnected() ? "connected" : "disconnected";
+    m_chatHelper->PostMsg(this, QString("[Server] conn id: %1 %2")
+        .arg(channel->id())
+        .arg(state));
+}
+
+void mainwindow::customEvent(QEvent* e)
+{
+    switch (e->type())
+    {
+    case qEventRecvMsg:
+        {
+		    QStringEvent* event = dynamic_cast<QStringEvent*>(e);
+            if (event)
+            {
+			    m_chatHelper->AppendMsg(event->m_msg);
+		    }
+            e->accept();
+            break;
+        }
+    default: break;
+    }
 }
