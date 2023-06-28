@@ -63,13 +63,13 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Link>
-      <AdditionalDependencies>hv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>hv.lib;sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(OutDir)lib\$(TargetName).lib</ImportLibrary>
-      <AdditionalLibraryDirectories>$(MSBuildProjectDirectory)\..\dependency\Win32\libhv\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(MSBuildProjectDirectory)\..\dependency\Win32\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\..\dependency\Win32\libhv\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildProjectDirectory)\..\dependency\Win32\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Win32'" Label="Configuration">
@@ -81,7 +81,7 @@
       <PreprocessorDefinitions>XCHATYUTILTY_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -101,6 +101,7 @@
   <ItemGroup>
     <ClInclude Include="customevent.h" />
     <ClInclude Include="chatyDef.h" />
+    <ClInclude Include="SqlHelper.h" />
     <ClInclude Include="xchatyutilty_global.h" />
     <ClInclude Include="chatwindowutilty.h" />
   </ItemGroup>

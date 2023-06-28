@@ -2,7 +2,7 @@
 #include "customevent.h"
 #include "htime.h"
 #include <QDebug>
-XChatyClient::XChatyClient(User* user, QWidget *parent)
+XChatyClient::XChatyClient(chaty::User* user, QWidget *parent)
     : QMainWindow(parent),
     m_user(user)
 {

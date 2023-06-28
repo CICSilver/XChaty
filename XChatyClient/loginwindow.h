@@ -18,7 +18,7 @@ public slots:
 private:
 	Ui::LoginWindowClass ui;
 	XChatyClient* m_chatWindow;
-	User* m_user;
+	chaty::User* m_user;
 
 	hv::TcpClient* m_logClient;
 };

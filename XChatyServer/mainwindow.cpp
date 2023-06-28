@@ -6,6 +6,8 @@
 #include <QDebug>
 #include <QDateTime>
 #include <qeventloop.h>
+#include <QThreadpool>
+#include "SqlHelper.h"
 mainwindow::mainwindow(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -31,6 +33,7 @@ mainwindow::mainwindow(QWidget *parent)
             m_server->start();
             m_chatHelper->OverWriteMsg(QString("Listening on port: %1").arg(port));
         });
+    //QThreadPool::globalInstance()->start()
 }
 
 mainwindow::~mainwindow()

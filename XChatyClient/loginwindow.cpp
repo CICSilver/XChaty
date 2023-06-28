@@ -11,6 +11,8 @@ LoginWindow::LoginWindow(QWidget *parent)
 	m_logClient = nullptr;
 	m_chatWindow = nullptr;
 	ui.passwdEdit->setEchoMode(QLineEdit::Password);
+
+	connect(ui.logBtn, &QPushButton::clicked, this, &LoginWindow::OnLogin);
 }
 
 LoginWindow::~LoginWindow()
@@ -29,10 +31,11 @@ void LoginWindow::OnLogin()
 	}
 	QString passwd_md5 = QCryptographicHash::hash(passwd.toUtf8(), QCryptographicHash::Md5).toHex();
 	// TODO: check name and passwd
-	m_user = new User;
+	m_user = new chaty::User;
 	m_user->userName = name;
 	m_user->passwd = passwd_md5;
 	
+
 	// 验证通过
 	m_chatWindow = new XChatyClient(m_user);
 	this->close();

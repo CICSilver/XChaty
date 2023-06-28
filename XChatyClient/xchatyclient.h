@@ -10,7 +10,7 @@ class XChatyClient : public QMainWindow
     Q_OBJECT
 
 public:
-    XChatyClient(User* user, QWidget *parent = nullptr);
+    XChatyClient(chaty::User* user, QWidget *parent = nullptr);
     ~XChatyClient();
 
 
@@ -25,5 +25,5 @@ private:
     Ui::XChatyClientClass ui;
     hv::TcpClient* m_client;
     ChatWindowUtilty* m_chatHelper;
-    User* m_user;
+    chaty::User* m_user;
 };
