@@ -4,6 +4,7 @@
 #include "ui_loginwindow.h"
 #include "chatyDef.h"
 #include "xchatyclient.h"
+#include "regwindow.h"
 class LoginWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -12,13 +13,19 @@ public:
 	LoginWindow(QWidget *parent = nullptr);
 	~LoginWindow();
 
+private:
+	void PostUserInfo(chaty::ClientMsgType msgType);
+
 public slots:
 	void OnLogin();
-
 private:
 	Ui::LoginWindowClass ui;
-	XChatyClient* m_chatWindow;
 	chaty::User* m_user;
-
 	hv::TcpClient* m_logClient;
+
+	XChatyClient* m_chatWindow;
+	RegWindow* m_regWindow;
+
+	int m_serverPort;
+	QString m_serverHost;
 };

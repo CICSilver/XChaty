@@ -1,13 +1,11 @@
 #pragma once
 #include "sqlite3.h"
+#include "chatyDef.h"
 #include "hv.h"
 #include <QString>
 #include <functional>
-#include "xchatyutilty_global.h"
-#include "chatyDef.h"
-
 using chaty::Callback;
-class XCHATYUTILTY_EXPORT SqlHelper
+class __declspec(dllexport) SqlHelper
 {
 public:
 	static SqlHelper* GetInstance()
@@ -19,14 +17,7 @@ public:
 	void Open(QString fileName)
 	{
 		QString dbPath = chaty::GetDataBasePath(fileName);
-		Open(dbPath.toStdString().c_str());
-	}
-
-	void Open(const char* fileName)
-	{
-		int rc = sqlite3_open(fileName, &m_db);
-		if (rc != SQLITE_OK)
-			XLOG("open db failed!");
+		_Open(dbPath.toStdString().c_str());
 	}
 
 	void Close()
@@ -48,9 +39,15 @@ public:
 		Exec(sql, data, callback, "Error inserting data: ");
 	}
 
+	void InsertData(const QString& table, const QString& columns, const QString& values, void* data = nullptr, Callback callback = DefaultCB)
+	{
+		QString sql = QString("INSERT INTO %1(%3) VALUES (%2)").arg(table).arg(values).arg(columns);
+	}
+
 	void Query(const QString& table, const QString& columns, const QString& _where, void* data = nullptr, Callback callback = DefaultCB)
 	{
 		QString sql = QString("SELECT %1 FROM %2 WHERE %3;").arg(columns).arg(table).arg(_where);
+		XLOG(sql);
 		Exec(sql, data, callback, "Error querying data: ");
 	}
 
@@ -77,6 +74,14 @@ private:
 	~SqlHelper() 
 	{
 		SAFE_DELETE(m_errmsg);
+	}
+	void _Open(const char* fileName)
+	{
+		int rc = sqlite3_open(fileName, &m_db);
+		if (rc != SQLITE_OK)
+			XLOG("open db failed!");
+		else
+			XLOG("open db success");
 	}
 	static int DefaultCB(void* data, int argc, char** argv, char** colname) {
 		// 默认回调，打印执行结果

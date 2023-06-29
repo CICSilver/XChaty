@@ -8,6 +8,7 @@ UserTableDAO::UserTableDAO()
 		user->id = atoi(argv[0]);
 		user->userName = argv[1];
 		user->passwd = argv[2];
+		XLOG(user->id, user->userName, user->passwd);
 		return 0;
 	};
 }
@@ -23,21 +24,11 @@ void UserTableDAO::InsertUser(chaty::User* user)
 
 void UserTableDAO::InsertUser(QString& name, QString& passwd)
 {
+	QString columns = "name, passwd";
 	auto helper = SqlHelper::GetInstance();
 	helper->Open(CHATY_DB_NAME);
-	helper->InsertData(CHATY_DB_USER_TABLE, QString("%1, %2").arg(name).arg(passwd));
+	helper->InsertData(CHATY_DB_USER_TABLE, columns, QString("%1, %2").arg(name).arg(passwd));
 	helper->Close();
-}
-
-chaty::User* UserTableDAO::GetUser(const QString name, const int id)
-{
-	if (name.isEmpty() && id == NULL)
-	{
-		XWAR("name and id all empty, query user failed.");
-		return nullptr;
-	}
-	QString sql_where = name.isEmpty() ? QString("id = %1").arg(id) : QString("name = %1").arg(name);
-	return nullptr;
 }
 
 chaty::User* UserTableDAO::GetUser(const QString name)
@@ -45,12 +36,18 @@ chaty::User* UserTableDAO::GetUser(const QString name)
 	chaty::User* pUser = new chaty::User;
 	auto helper = SqlHelper::GetInstance();
 	helper->Open(CHATY_DB_NAME);
-	helper->Query(CHATY_DB_USER_TABLE, "id name passwd", QString("name = %1").arg(name), pUser, m_queryUserCB);
+	helper->Query("UserTable", "id,name,passwd", QString("name = %1").arg(name), pUser, m_queryUserCB);
 	helper->Close();
 	return pUser;
 }
 
 chaty::User* UserTableDAO::GetUser(const int id)
 {
-	return nullptr;
+	XLOG("GetUser");
+	chaty::User* pUser = new chaty::User;
+	auto helper = SqlHelper::GetInstance();
+	helper->Open(CHATY_DB_NAME);
+	helper->Query("UserTable", "id,name,passwd", QString("id=%1").arg(id), pUser, m_queryUserCB);
+	helper->Close();
+	return pUser;
 }

@@ -66,7 +66,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(MSBuildProjectDirectory)\..\dependency\Win32\lib;$(OutDir)lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>hv.lib;XChatyUtilty.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>hv.lib;XChatyUtilty.lib;sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Win32'" Label="Configuration">

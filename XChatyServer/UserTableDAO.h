@@ -8,7 +8,6 @@ public:
 	~UserTableDAO();
 	void InsertUser(chaty::User* user);
 	void InsertUser(QString& name, QString& passwd);
-	chaty::User* GetUser(const QString name = "", const int id = NULL);
 	chaty::User* GetUser(const QString name);
 	chaty::User* GetUser(const int id);
 
