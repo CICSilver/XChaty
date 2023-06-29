@@ -11,7 +11,3 @@
 #else
 # define XCHATYUTILTY_EXPORT
 #endif
-
-#define XLOG(...) qDebug() << __FILE__ << ":" << __LINE__ << " : " << __VA_ARGS__
-#define XWAR(...) qWarning() << __FILE__ << ":" << __LINE__ << " : " << __VA_ARGS__
-#define XERR(...) qCritical() << __FILE__ << ":" << __LINE__ << " : " << __VA_ARGS__

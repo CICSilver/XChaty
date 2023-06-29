@@ -76,7 +76,7 @@
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -95,14 +95,22 @@
   <ItemGroup>
     <QtRcc Include="xchatyclient.qrc" />
     <QtUic Include="loginwindow.ui" />
+    <QtUic Include="regwindow.ui" />
     <QtUic Include="xchatyclient.ui" />
     <QtMoc Include="xchatyclient.h" />
     <ClCompile Include="loginwindow.cpp" />
+    <ClCompile Include="regwindow.cpp" />
     <ClCompile Include="xchatyclient.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="loginwindow.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="regwindow.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

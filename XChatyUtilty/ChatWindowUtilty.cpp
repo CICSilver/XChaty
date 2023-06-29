@@ -9,7 +9,6 @@ void ChatWindowUtilty::ShowMsg(const QString& str)
 	m_chatEdit->setText(newStr);
 	m_chatEdit->repaint();
 }
-
 void ChatWindowUtilty::AppendMsg(const QString& str)
 {
 	// "....\n...\n...\n"

@@ -1,12 +1,13 @@
-﻿#include "mainwindow.h"
-#include "chatwindowutilty.h"
-#include "customevent.h"
-#include "htime.h"
-#include <QMessageBox>
+﻿#include <QMessageBox>
 #include <QDebug>
 #include <QDateTime>
 #include <qeventloop.h>
 #include <QThreadpool>
+#include <QDataStream>
+#include "mainwindow.h"
+#include "chatwindowutilty.h"
+#include "customevent.h"
+#include "htime.h"
 #include "SqlHelper.h"
 mainwindow::mainwindow(QWidget *parent)
     : QMainWindow(parent)
@@ -57,17 +58,25 @@ void mainwindow::InitChatServer()
 
 void mainwindow::onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf)
 {
-    QString recvMsg = QString::fromLocal8Bit((char*)buf->data(), buf->size());
-    if (recvMsg.size() == 1 && recvMsg.at(0) == 'h')
-    {
-        // 心跳包
-        channel->write("s");
-        return;
-    }
-    
-    m_chatHelper->PostMsg(this, recvMsg);
-    // echo
-     m_server->broadcast(recvMsg.toStdString());
+    QByteArray qbuffer((char*)buf->data(), buf->size());
+    QDataStream stream(&qbuffer, QIODevice::ReadOnly);
+    chaty::ClientMessage msg;
+    QString str;
+    stream >> str;
+    stream >> msg;
+    XLOG(str, msg.user.userName);
+    m_chatHelper->PostMsg(this, msg.user.userName);
+    //QString recvMsg = QString::fromLocal8Bit((char*)buf->data(), buf->size());
+    //if (recvMsg.size() == 1 && recvMsg.at(0) == 'h')
+    //{
+    //    // 心跳包
+    //    channel->write("s");
+    //    return;
+    //}
+
+    //m_chatHelper->PostMsg(this, recvMsg);
+    //// echo
+    // m_server->broadcast(recvMsg.toStdString());
 }
 
 void mainwindow::onConnection(const hv::SocketChannelPtr& channel)
