@@ -38,6 +38,7 @@ LoginWindow::LoginWindow(QWidget *parent)
 LoginWindow::~LoginWindow()
 {
 	SAFE_DELETE(m_user);
+	SAFE_DELETE(m_logClient);
 }
 
 void LoginWindow::PostUserInfo(chaty::ClientMsgType msgType)
