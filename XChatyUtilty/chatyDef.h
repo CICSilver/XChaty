@@ -5,9 +5,12 @@
 #include <QDir>
 #include <QDebug>
 #include <QDataStream>
+#include <QDateTime>
+#include <memory>
 
 #define CHATY_DB_NAME "ChatDB.db"
 #define CHATY_DB_USER_TABLE "UserTable"
+
 namespace
 {
 	// 递归处理多个参数
@@ -41,10 +44,12 @@ namespace chaty
 
 	enum ClientMsgType
 	{
-		LOGIN = 0,
-		REGIST,
-		CHAT,
-		DEFAULT = 1000
+		MSG_LOGIN = 0,
+		MSG_REGIST,
+		MSG_CHAT,
+		MSG_HB,
+		MSG_ERR = 254,
+		MSG_DEFAULT = 255	// Max of 8 bit unsigned
 	};
 
 	typedef struct UserStruct
@@ -56,40 +61,25 @@ namespace chaty
 			id = "";
 		}
 
-		UserStruct operator=(UserStruct& _user)
+		UserStruct& operator=(const UserStruct& _user)
 		{
-			UserStruct user;
-			user.id = _user.id;
-			user.userName = _user.userName;
-			user.passwd = _user.passwd;
-			return user;
+			this->id = _user.id;
+			this->userName = _user.userName;
+			this->passwd = _user.passwd;
+			return *this;
+		}
+		UserStruct operator=(const UserStruct* _user)
+		{
+			this->id = _user->id;
+			this->userName = _user->userName;
+			this->passwd = _user->passwd;
+			return *this;
 		}
 
 		QString userName;
 		QString passwd;
 		QString id;
 	}User;
-
-	typedef struct ClientMessage
-	{
-		// login message from client
-		ClientMessage() 
-		{
-			msgType = DEFAULT;
-			chatMsg = "";
-			chatRoom = 0;
-		}
-		ClientMessage(User _user, ClientMsgType _type)
-			: ClientMessage()
-		{
-			this->user = _user;
-			this->msgType = _type;
-		}
-		User user;
-		QString chatMsg;
-		int chatRoom;
-		ClientMsgType msgType;
-	}LogMsg, ChatMsg;
 
 	static QString GetDataBasePath(QString db_name) {
 		// 获取执行文件目录
@@ -103,7 +93,6 @@ namespace chaty
 		return file_path;
 	}
 
-	// 序列化/反序列化
 	static QDataStream& operator<<(QDataStream& stream, const UserStruct& user) {
 		stream << user.userName << user.passwd << user.id;
 		return stream;
@@ -113,15 +102,206 @@ namespace chaty
 		return stream;
 	}
 
+
+}// end namespace chaty
+
+namespace protochat
+{
+
+	typedef struct MessageBase
+	{
+		MessageBase()
+		{
+			custom_msg = "";
+		}
+		virtual ~MessageBase() {}
+
+		virtual std::unique_ptr<MessageBase> clone() = 0;
+		QString custom_msg;
+	}BaseMsg;
+	typedef struct LoginMsg : public BaseMsg
+	{
+		LoginMsg() :user() {}
+		LoginMsg(const LoginMsg& _msg)
+			: user(_msg.user) {}
+		LoginMsg(chaty::User _user)
+		{
+			user = _user;
+		}
+		std::unique_ptr<BaseMsg> clone() override
+		{
+			return std::make_unique<LoginMsg>(*this);
+		}
+		LoginMsg& operator=(const LoginMsg& _msg)
+		{
+			this->user = _msg.user;
+			return *this;
+		}
+		chaty::User user;
+	}RegistMsg;
+
+	typedef struct ClientMessage: public BaseMsg
+	{
+		// login message from client
+		ClientMessage()
+		{
+			userName = "";
+			chatMsg = "";
+			chatRoom = 0;
+		}
+		ClientMessage(const ClientMessage& msg)
+			: userName(msg.userName), chatMsg(msg.chatMsg), chatRoom(msg.chatRoom) {}
+		std::unique_ptr<BaseMsg> clone() override
+		{
+			return std::make_unique<ClientMessage>(*this);
+		}
+		ClientMessage& operator=(const ClientMessage& _msg)
+		{
+			this->userName = _msg.userName;
+			this->chatMsg = _msg.chatMsg;
+			this->chatRoom = _msg.chatRoom;
+			return *this;
+		}
+		QString userName;
+		QString chatMsg;
+		int chatRoom;
+	}ChatMsg;
+
+	struct chatyHead
+	{
+		chatyHead()
+		{
+			time = "";
+			msgType = chaty::MSG_DEFAULT;
+		}
+		QString time;
+		quint8 msgType;
+	};
+
+	struct ChatyMessage
+	{
+		ChatyMessage()
+			:msgHead(), pMsgBody(Q_NULLPTR)
+		{
+		}
+		ChatyMessage(chaty::ClientMsgType _type, BaseMsg *msg_body)
+		{
+			chatyHead head;
+			head.time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+			head.msgType = _type;
+			switch (_type)
+			{
+				case chaty::MSG_LOGIN:
+				case chaty::MSG_REGIST:
+				{
+					LoginMsg* msg = dynamic_cast<LoginMsg*>(msg_body);
+					pMsgBody = std::make_unique<LoginMsg>(*msg);
+					break;
+				}
+				case chaty::MSG_CHAT:
+				{
+					ChatMsg* msg = dynamic_cast<ChatMsg*>(msg_body);
+					pMsgBody = std::make_unique<ChatMsg>(*msg);
+					break;
+				}
+				default:
+					break;
+			}
+		}
+		ChatyMessage(const ChatyMessage& msg)
+			: msgHead(msg.msgHead)
+			, pMsgBody(msg.pMsgBody ? msg.pMsgBody->clone() : Q_NULLPTR) {}
+		~ChatyMessage() {}
+		std::unique_ptr<BaseMsg> pMsgBody;
+		chatyHead msgHead;
+	};
+
+	// 序列化
 	static QDataStream& operator<<(QDataStream& stream, const ClientMessage& msg) {
-		stream << msg.user << static_cast<qint32>(msg.msgType);
+		stream << msg.userName << msg.chatMsg << msg.chatRoom;
 		return stream;
 	}
-	static QDataStream& operator>>(QDataStream& stream, ClientMessage& msg) {
-		qint32 type;
-		stream >> msg.user >> type;
-		msg.msgType = static_cast<ClientMsgType>(type);
+	static QDataStream& operator<<(QDataStream& stream, const LoginMsg& msg) {
+		stream << msg.user;
+		return stream;
+	}
+	static QDataStream& operator<<(QDataStream& stream, const chatyHead& msg) {
+		stream << msg.msgType << msg.time;
+		return stream;
+	}
+	static QDataStream& operator<<(QDataStream& stream, ChatyMessage& msg)
+	{
+		switch (msg.msgHead.msgType)
+		{
+			case chaty::MSG_LOGIN:
+			case chaty::MSG_REGIST:
+			{
+				LoginMsg* login_msg = dynamic_cast<LoginMsg*>(msg.pMsgBody.get());
+				stream << login_msg->user << login_msg->custom_msg;
+			}
+			case chaty::MSG_CHAT:
+			{
+				LoginMsg* login_msg = dynamic_cast<LoginMsg*>(msg.pMsgBody.get());
+				stream << login_msg->user << login_msg->custom_msg;
+			}
+			default:
+				break;
+		}
 		return stream;
 	}
 
-}// end namespace chaty
+	// 反序列化
+	static QDataStream& operator>>(QDataStream& stream, ClientMessage& msg) {
+		stream >> msg.userName >> msg.chatMsg >> msg.chatRoom;
+		return stream;
+	}
+	static QDataStream& operator>>(QDataStream& stream, LoginMsg& msg) {
+		stream >> msg.user;
+		return stream;
+	}
+	static QDataStream& operator>>(QDataStream& stream, chatyHead& msg) {
+		stream >> msg.msgType >> msg.time;
+		return stream;
+	}
+	static QDataStream& operator>>(QDataStream& stream, ChatyMessage& msg)
+	{
+		stream >> msg.msgHead;
+		switch (msg.msgHead.msgType)
+		{
+			case chaty::MSG_LOGIN:
+			case chaty::MSG_REGIST:
+			{
+				RegistMsg _msg_body;
+				stream >> _msg_body;
+				msg.pMsgBody = std::make_unique<RegistMsg>(_msg_body);
+				break;
+			}
+			case chaty::MSG_CHAT:
+			{
+				ChatMsg _msg_body;
+				stream >> _msg_body;
+				msg.pMsgBody = std::make_unique<ChatMsg>(_msg_body);
+				break;
+			}
+			default:
+				break;
+		}
+		return stream;
+	}
+
+	static QByteArray Serrialize(protochat::ChatyMessage msg)
+	{
+		QByteArray buffer;
+		QDataStream stream(&buffer, QIODevice::WriteOnly);
+		stream << msg;
+		return buffer;
+	};
+	static protochat::ChatyMessage DeSerrialize(const QByteArray& ba)
+	{
+		QByteArray _temp_ba(ba);
+		QDataStream stream(&_temp_ba, QIODevice::ReadOnly);
+		protochat::ChatyMessage msg;
+		stream >> msg;
+		return msg;
+	}
+}// end namespace msgProto

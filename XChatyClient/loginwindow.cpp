@@ -26,7 +26,7 @@ LoginWindow::LoginWindow(QWidget *parent)
 					connect(m_regWindow, &RegWindow::RegisterSuccess, this, [this] ()
 							{
 								// 注册成功
-								PostUserInfo(chaty::REGIST);
+								PostUserInfo(chaty::MSG_REGIST);
 								m_regWindow->close();
 								m_regWindow = nullptr;
 							});
@@ -38,34 +38,32 @@ LoginWindow::LoginWindow(QWidget *parent)
 LoginWindow::~LoginWindow()
 {
 	SAFE_DELETE(m_user);
-	SAFE_DELETE(m_logClient);
 }
 
 void LoginWindow::PostUserInfo(chaty::ClientMsgType msgType)
 {
 	XLOG("PostUserInfo");
-	hv::TcpClient logClient;
-	int connfd = logClient.createsocket(m_serverPort, m_serverHost.toUtf8().constData());
+	hv::TcpClient loginClient;
+	int connfd = loginClient.createsocket(m_serverPort, m_serverHost.toUtf8().constData());
 	if (connfd < 0)
 	{
 		QMessageBox::warning(this, "warning", "server connecting failed");
 		return;
 	}
-	chaty::ClientMessage msg(*m_user, msgType);
-	QByteArray buffer;
-	QDataStream stream(&buffer, QIODevice::WriteOnly);
-	stream << msg;
-	logClient.onWriteComplete = [&, this] (const hv::TcpClient::TSocketChannelPtr& channel, hv::Buffer* buffer)
+	protochat::LoginMsg loginMsg;
+	loginMsg.user = m_user;
+	QByteArray ba = protochat::Serrialize(protochat::ChatyMessage(chaty::MSG_LOGIN, &loginMsg));
+	loginClient.onWriteComplete = [&, this] (const hv::TcpClient::TSocketChannelPtr& channel, hv::Buffer* buffer)
 	{
 		XLOG("[Client] Write done");
-		logClient.closesocket();
+		loginClient.closesocket();
 	};
-	logClient.onConnection = [this] (const hv::TcpClient::TSocketChannelPtr& channel)
+	loginClient.onConnection = [this] (const hv::TcpClient::TSocketChannelPtr& channel)
 	{
 		XLOG("connect to", channel->id());
 	};
-	logClient.start();
-	logClient.send(buffer, buffer.size());
+	loginClient.start();
+	loginClient.send(ba.data(), ba.length());
 }
 
 

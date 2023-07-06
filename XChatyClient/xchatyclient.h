@@ -8,6 +8,8 @@
 class XChatyClient : public QMainWindow
 {
     Q_OBJECT
+    typedef protochat::ChatyMessage ChatyMsg;
+    typedef protochat::ChatMsg ChatMsg;
 
 public:
     XChatyClient(chaty::User* user, QWidget *parent = nullptr);

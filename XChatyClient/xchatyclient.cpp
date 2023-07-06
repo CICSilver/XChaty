@@ -48,18 +48,18 @@ bool XChatyClient::InitConnect()
     {
         QString str = channel->isConnected() ? "connected" : "disconnected";
         m_chatHelper->PostMsg(this, QString("connfd: %1 is %2.").arg(channel->fd()).arg(str));
-        // 设置心跳包,每分钟发送一次
-        hv::setInterval(60000, [channel](hv::TimerID timerId)
-            {
-			    if (channel->isConnected())
-				    {
-					    channel->write("h");
-				    }
-				    else
-				    {
-					    hv::killTimer(timerId);
-				    }
-            });
+       // // 设置心跳包,每分钟发送一次
+       // hv::setInterval(60000, [channel](hv::TimerID timerId)
+       //     {
+			    //if (channel->isConnected()) 
+				   // {
+					  //  channel->write("h");
+				   // }
+				   // else
+				   // {
+					  //  hv::killTimer(timerId);
+				   // }
+       //     });
     };
 
     m_client->start();
@@ -88,7 +88,13 @@ void XChatyClient::SendMsg()
 {
     if (m_client->isConnected())
     {
-        QString sendMsg = ui.sendEdit->text();
-        m_client->send(sendMsg.toStdString().c_str(), sendMsg.length());
+        ChatMsg chatMsg;
+        chatMsg.chatMsg = ui.sendEdit->text();
+        chatMsg.userName = m_user->userName;
+        chatMsg.chatRoom = 0;
+        ChatyMsg msg(chaty::MSG_CHAT, &chatMsg);
+        QByteArray ba = protochat::Serrialize(msg);
+        m_client->send(ba.constData(), ba.length());
+        //m_client->send(msg, sendMsg.length());
     }
 }

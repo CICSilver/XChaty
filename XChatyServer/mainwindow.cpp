@@ -59,13 +59,36 @@ void mainwindow::InitChatServer()
 void mainwindow::onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf)
 {
     QByteArray qbuffer((char*)buf->data(), buf->size());
-    QDataStream stream(&qbuffer, QIODevice::ReadOnly);
-    chaty::ClientMessage msg;
-    QString str;
-    stream >> str;
-    stream >> msg;
-    XLOG(str, msg.user.userName);
-    m_chatHelper->PostMsg(this, msg.user.userName);
+    ChatyMessage msg = protochat::DeSerrialize(qbuffer);
+    switch (msg.msgHead.msgType)
+    {
+        case chaty::MSG_LOGIN:
+        {
+            // login request
+            LoginMsg* login_msg = dynamic_cast<LoginMsg*>(msg.pMsgBody.get());
+            XLOG(login_msg->user.userName);
+            break;
+        }
+        case chaty::MSG_REGIST:
+        {
+            // regist request
+            RegistMsg* reg_msg = dynamic_cast<RegistMsg*>(msg.pMsgBody.get());
+            break;
+        }
+        case chaty::MSG_CHAT:
+        {
+            // chat request
+            ChatMsg* chat_msg = dynamic_cast<ChatMsg*>(msg.pMsgBody.get());
+            XLOG(chat_msg->chatRoom, chat_msg->userName, chat_msg->chatMsg);
+            m_chatHelper->PostMsg(this, chat_msg->chatMsg);
+            break;
+        }
+        default:
+            break;
+    }
+    //XLOG(str, str.user.userName);
+    //m_chatHelper->PostMsg(this, msg.user.userName);
+    
     //QString recvMsg = QString::fromLocal8Bit((char*)buf->data(), buf->size());
     //if (recvMsg.size() == 1 && recvMsg.at(0) == 'h')
     //{
