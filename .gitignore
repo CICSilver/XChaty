@@ -16,3 +16,9 @@
 /Debug
 /XChatyClient/Debug
 /UnitTest
+/XChatyClient/Release
+/XChatyClient/XChatyClient.vcxproj.user
+/XChatyServer/Release
+/XChatyUtilty/Release
+/XChatyServer/XChatyServer.vcxproj.user
+/XChatyUtilty/XChatyUtilty.vcxproj.user
