@@ -169,10 +169,10 @@ namespace protochat
 
 	struct chatyHead
 	{
-		chatyHead()
+		chatyHead(chaty::ClientMsgType _type = chaty::MSG_DEFAULT)
+			: msgType(_type)
 		{
-			time = "";
-			msgType = chaty::MSG_DEFAULT;
+			time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
 		}
 		QString time;
 		quint8 msgType;
@@ -181,14 +181,10 @@ namespace protochat
 	struct ChatyMessage
 	{
 		ChatyMessage()
-			:msgHead(), pMsgBody(Q_NULLPTR)
-		{
-		}
+			:msgHead(), pMsgBody(Q_NULLPTR) {}
 		ChatyMessage(chaty::ClientMsgType _type, BaseMsg *msg_body)
 		{
-			chatyHead head;
-			head.time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
-			head.msgType = _type;
+			msgHead.msgType = _type;
 			switch (_type)
 			{
 				case chaty::MSG_LOGIN:
@@ -211,6 +207,12 @@ namespace protochat
 		ChatyMessage(const ChatyMessage& msg)
 			: msgHead(msg.msgHead)
 			, pMsgBody(msg.pMsgBody ? msg.pMsgBody->clone() : Q_NULLPTR) {}
+		void Init()
+		{
+			pMsgBody = nullptr;
+			msgHead.msgType = chaty::MSG_DEFAULT;
+			msgHead.time = "";
+		}
 		~ChatyMessage() {}
 		std::unique_ptr<BaseMsg> pMsgBody;
 		chatyHead msgHead;
@@ -231,22 +233,26 @@ namespace protochat
 	}
 	static QDataStream& operator<<(QDataStream& stream, ChatyMessage& msg)
 	{
+		stream << msg.msgHead;
 		switch (msg.msgHead.msgType)
 		{
 			case chaty::MSG_LOGIN:
 			case chaty::MSG_REGIST:
 			{
+				XLOG("Login/Regist");
 				LoginMsg* login_msg = dynamic_cast<LoginMsg*>(msg.pMsgBody.get());
 				stream << login_msg->user << login_msg->custom_msg;
 			}
 			case chaty::MSG_CHAT:
 			{
-				LoginMsg* login_msg = dynamic_cast<LoginMsg*>(msg.pMsgBody.get());
-				stream << login_msg->user << login_msg->custom_msg;
+				XLOG("Chat");
+				ChatMsg* chat_msg = dynamic_cast<ChatMsg*>(msg.pMsgBody.get());
+				stream << chat_msg->userName << chat_msg->chatMsg << chat_msg->chatRoom;
 			}
 			default:
 				break;
 		}
+		XLOG("ChatyMessage seriallize done");
 		return stream;
 	}
 
@@ -261,11 +267,13 @@ namespace protochat
 	}
 	static QDataStream& operator>>(QDataStream& stream, chatyHead& msg) {
 		stream >> msg.msgType >> msg.time;
+		XLOG(msg.msgType, msg.time);
 		return stream;
 	}
 	static QDataStream& operator>>(QDataStream& stream, ChatyMessage& msg)
 	{
 		stream >> msg.msgHead;
+		XLOG(msg.msgHead.msgType);
 		switch (msg.msgHead.msgType)
 		{
 			case chaty::MSG_LOGIN:
@@ -294,6 +302,7 @@ namespace protochat
 		QByteArray buffer;
 		QDataStream stream(&buffer, QIODevice::WriteOnly);
 		stream << msg;
+		XLOG(msg.msgHead.msgType);
 		return buffer;
 	};
 	static protochat::ChatyMessage DeSerrialize(const QByteArray& ba)
@@ -301,6 +310,7 @@ namespace protochat
 		QByteArray _temp_ba(ba);
 		QDataStream stream(&_temp_ba, QIODevice::ReadOnly);
 		protochat::ChatyMessage msg;
+		msg.Init();
 		stream >> msg;
 		return msg;
 	}

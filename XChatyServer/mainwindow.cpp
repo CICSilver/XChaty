@@ -16,29 +16,33 @@ mainwindow::mainwindow(QWidget *parent)
     m_server = nullptr;
     m_chatHelper = ChatWindowUtilty::GetInstance(ui.chatEdit);
     InitChatServer();
-    connect(ui.startBtn, &QPushButton::clicked, this, [this]()
+
+    auto StartServer = [this] ()
+    {
+        QString port = ui.portEdit->text();
+        if (port.isEmpty())
         {
-            QString port = ui.portEdit->text();
-            if (port.isEmpty())
-            {
-                m_chatHelper->AppendMsg("Port is empty!");
-                return;
-            }
-            int listenfd = m_server->createsocket(port.toInt());
-            if (listenfd < 0)
-            {
-				m_chatHelper->AppendMsg("Create socket failed!");
-				return;
-			}
-            m_server->setThreadNum(1);
-            m_server->start();
-            m_chatHelper->OverWriteMsg(QString("Listening on port: %1").arg(port));
-        });
+            m_chatHelper->AppendMsg("Port is empty!");
+            return;
+        }
+        int listenfd = m_server->createsocket(port.toInt());
+        if (listenfd < 0)
+        {
+            m_chatHelper->AppendMsg("Create socket failed!");
+            return;
+        }
+        m_server->setThreadNum(1);
+        m_server->start();
+        m_chatHelper->OverWriteMsg(QString("Listening on port: %1").arg(port));
+    };
+    StartServer();
+    connect(ui.startBtn, &QPushButton::clicked, this, StartServer);
     //QThreadPool::globalInstance()->start()
 }
 
 mainwindow::~mainwindow()
 {
+    XLOG("~mainwindow()");
     SAFE_DELETE(m_server);
 }
 
@@ -51,6 +55,7 @@ void mainwindow::InitChatServer()
 	};
     m_server->onMessage = [this](const hv::SocketChannelPtr& channel, hv::Buffer* buf)
     {
+        qDebug() << "onMsg";
 		onMsg(channel, buf);
 	};
     
@@ -59,7 +64,9 @@ void mainwindow::InitChatServer()
 void mainwindow::onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf)
 {
     QByteArray qbuffer((char*)buf->data(), buf->size());
+    XLOG(buf->size());
     ChatyMessage msg = protochat::DeSerrialize(qbuffer);
+    XLOG(msg.msgHead.time, msg.msgHead.msgType);
     switch (msg.msgHead.msgType)
     {
         case chaty::MSG_LOGIN:
@@ -106,7 +113,7 @@ void mainwindow::onConnection(const hv::SocketChannelPtr& channel)
 {
     QString state = channel->isConnected() ? "connected" : "disconnected";
     // 设置超时时间
-    channel->setKeepaliveTimeout(60000);
+    //channel->setKeepaliveTimeout(60000);
     m_chatHelper->PostMsg(this, QString("[Server] conn id: %1 %2")
         .arg(channel->id())
         .arg(state));

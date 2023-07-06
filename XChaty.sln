@@ -5,6 +5,7 @@ VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XChatyServer", "XChatyServer\XChatyServer.vcxproj", "{1A9BD666-769D-4E8C-9A7F-A2FCBC8E221D}"
 	ProjectSection(ProjectDependencies) = postProject
+		{01E3D343-B99F-4059-B1EA-D652946AC6D3} = {01E3D343-B99F-4059-B1EA-D652946AC6D3}
 		{9545BBEC-4E56-46F7-8E9E-6BA20DC93459} = {9545BBEC-4E56-46F7-8E9E-6BA20DC93459}
 	EndProjectSection
 EndProject

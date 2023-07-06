@@ -18,8 +18,13 @@ XChatyClient::XChatyClient(chaty::User* user, QWidget *parent)
 
 XChatyClient::~XChatyClient()
 {
+    if (m_client)
+    {
+        if(m_client->isConnected())
+            m_client->stop();
+    }
     SAFE_DELETE(m_client);
-    SAFE_DELETE(m_user);
+    //SAFE_DELETE(m_user);
 }
 
 bool XChatyClient::InitConnect()
@@ -41,8 +46,10 @@ bool XChatyClient::InitConnect()
 
     m_client->onMessage = [this](const hv::SocketChannelPtr& channel, hv::Buffer* buf)
     {
-        QString recvMsg = QString::fromLocal8Bit((char*)buf->data(), buf->size());
-        m_chatHelper->PostMsg(this, recvMsg);
+        QByteArray ba((char*)buf->data());
+        ChatyMsg msg = protochat::DeSerrialize(ba);
+        ChatMsg* chat_msg = dynamic_cast<ChatMsg*>(msg.pMsgBody.get());
+        m_chatHelper->PostMsg(this, chat_msg->chatMsg);
     };
     m_client->onConnection = [this](const hv::SocketChannelPtr& channel)
     {
@@ -86,6 +93,8 @@ void XChatyClient::customEvent(QEvent* e)
 
 void XChatyClient::SendMsg()
 {
+    //qDebug() << "SendMsg";
+    XLOG(m_client->isConnected());
     if (m_client->isConnected())
     {
         ChatMsg chatMsg;
@@ -93,8 +102,18 @@ void XChatyClient::SendMsg()
         chatMsg.userName = m_user->userName;
         chatMsg.chatRoom = 0;
         ChatyMsg msg(chaty::MSG_CHAT, &chatMsg);
+        XLOG(msg.msgHead.msgType);
         QByteArray ba = protochat::Serrialize(msg);
-        m_client->send(ba.constData(), ba.length());
-        //m_client->send(msg, sendMsg.length());
+        XLOG(ba.size());
+
+        m_client->send(ba.constData(), ba.size());
+
+    }
+    else
+    {
+        SAFE_DELETE(m_client);
+        m_client = nullptr;
+        // 尝试重连
+        InitConnect();
     }
 }
