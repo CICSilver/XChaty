@@ -38,9 +38,15 @@
     <ClInclude Include="SqlHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Protoc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="chatwindowutilty.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Protoc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

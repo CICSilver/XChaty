@@ -101,12 +101,14 @@
   <ItemGroup>
     <ClInclude Include="customevent.h" />
     <ClInclude Include="chatyDef.h" />
+    <ClInclude Include="Protoc.h" />
     <ClInclude Include="SqlHelper.h" />
     <ClInclude Include="xchatyutilty_global.h" />
     <ClInclude Include="chatwindowutilty.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="chatwindowutilty.cpp" />
+    <ClCompile Include="Protoc.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
