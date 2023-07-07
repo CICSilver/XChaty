@@ -28,4 +28,6 @@ private:
     hv::TcpClient* m_client;
     ChatWindowUtilty* m_chatHelper;
     chaty::User* m_user;
+    quint16 m_HB_interval;
+    int m_hb_timerId;
 };

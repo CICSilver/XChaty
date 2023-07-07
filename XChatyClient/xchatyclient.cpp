@@ -9,6 +9,7 @@ XChatyClient::XChatyClient(chaty::User* user, QWidget *parent)
     ui.setupUi(this);
     m_client = nullptr;
     m_chatHelper = ChatWindowUtilty::GetInstance(ui.chatEdit);
+    m_HB_interval = 1000;   // TEST:每秒一次心跳包
     if(!InitConnect())
         m_chatHelper->AppendMsg("connect failed!");
     m_chatHelper->OverWriteMsg("connect success!");
@@ -55,18 +56,20 @@ bool XChatyClient::InitConnect()
     {
         QString str = channel->isConnected() ? "connected" : "disconnected";
         m_chatHelper->PostMsg(this, QString("connfd: %1 is %2.").arg(channel->fd()).arg(str));
-       // // 设置心跳包,每分钟发送一次
-       // hv::setInterval(60000, [channel](hv::TimerID timerId)
-       //     {
-			    //if (channel->isConnected()) 
-				   // {
-					  //  channel->write("h");
-				   // }
-				   // else
-				   // {
-					  //  hv::killTimer(timerId);
-				   // }
-       //     });
+        // 设置心跳包,每分钟发送一次
+        hv::setInterval(m_HB_interval, [channel](hv::TimerID timerId)
+        {
+			if (channel->isConnected()) 
+			{
+                ChatyMsg msg(chaty_client::REQ_HB);
+                QByteArray ba = protochat::Serrialize(msg);
+				channel->write(ba.constData(), ba.size());
+			}
+			else
+			{
+				hv::killTimer(timerId);
+			}
+        });
     };
 
     m_client->start();
@@ -101,7 +104,7 @@ void XChatyClient::SendMsg()
         chatMsg.chatMsg = ui.sendEdit->text();
         chatMsg.userName = m_user->userName;
         chatMsg.chatRoom = 0;
-        ChatyMsg msg(chaty::MSG_CHAT, &chatMsg);
+        ChatyMsg msg(chaty_client::REQ_CHAT, &chatMsg);
         XLOG(msg.msgHead.msgType);
         QByteArray ba = protochat::Serrialize(msg);
         XLOG(ba.size());

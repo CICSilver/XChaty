@@ -26,7 +26,7 @@ LoginWindow::LoginWindow(QWidget *parent)
 					connect(m_regWindow, &RegWindow::RegisterSuccess, this, [this] ()
 							{
 								// 注册成功
-								PostUserInfo(chaty::MSG_REGIST);
+								PostUserInfo(chaty_client::REQ_REGIST);
 								m_regWindow->close();
 								m_regWindow = nullptr;
 							});
@@ -40,7 +40,7 @@ LoginWindow::~LoginWindow()
 	SAFE_DELETE(m_user);
 }
 
-void LoginWindow::PostUserInfo(chaty::ClientMsgType msgType)
+void LoginWindow::PostUserInfo(chaty_client::RequestType msgType)
 {
 	XLOG("PostUserInfo");
 	hv::TcpClient loginClient;
@@ -52,7 +52,7 @@ void LoginWindow::PostUserInfo(chaty::ClientMsgType msgType)
 	}
 	protochat::LoginMsg loginMsg;
 	loginMsg.user = m_user;
-	QByteArray ba = protochat::Serrialize(protochat::ChatyMessage(chaty::MSG_LOGIN, &loginMsg));
+	QByteArray ba = protochat::Serrialize(protochat::ChatyMessage(chaty_client::REQ_LOGIN, &loginMsg));
 	loginClient.onWriteComplete = [&, this] (const hv::TcpClient::TSocketChannelPtr& channel, hv::Buffer* buffer)
 	{
 		XLOG("[Client] Write done");

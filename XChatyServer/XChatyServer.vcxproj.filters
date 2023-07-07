@@ -46,6 +46,9 @@
     <ClCompile Include="UserTableDAO.cpp">
       <Filter>DAO</Filter>
     </ClCompile>
+    <ClCompile Include="connectinfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="sqliterunnable.h">
@@ -54,5 +57,13 @@
     <ClInclude Include="UserTableDAO.h">
       <Filter>DAO</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="connectinfo.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>

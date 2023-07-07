@@ -9,6 +9,7 @@
 #include "customevent.h"
 #include "htime.h"
 #include "SqlHelper.h"
+#include "UserTableDAO.h"
 mainwindow::mainwindow(QWidget *parent)
     : QMainWindow(parent)
 {
@@ -31,7 +32,7 @@ mainwindow::mainwindow(QWidget *parent)
             m_chatHelper->AppendMsg("Create socket failed!");
             return;
         }
-        m_server->setThreadNum(1);
+        m_server->setThreadNum(4);
         m_server->start();
         m_chatHelper->OverWriteMsg(QString("Listening on port: %1").arg(port));
     };
@@ -66,23 +67,25 @@ void mainwindow::onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf)
     QByteArray qbuffer((char*)buf->data(), buf->size());
     XLOG(buf->size());
     ChatyMessage msg = protochat::DeSerrialize(qbuffer);
-    XLOG(msg.msgHead.time, msg.msgHead.msgType);
+
+    RespMsg response;
     switch (msg.msgHead.msgType)
     {
-        case chaty::MSG_LOGIN:
+        case chaty_client::REQ_LOGIN:
         {
             // login request
             LoginMsg* login_msg = dynamic_cast<LoginMsg*>(msg.pMsgBody.get());
+            
             XLOG(login_msg->user.userName);
             break;
         }
-        case chaty::MSG_REGIST:
+        case chaty_client::REQ_REGIST:
         {
             // regist request
             RegistMsg* reg_msg = dynamic_cast<RegistMsg*>(msg.pMsgBody.get());
             break;
         }
-        case chaty::MSG_CHAT:
+        case chaty_client::REQ_CHAT:
         {
             // chat request
             ChatMsg* chat_msg = dynamic_cast<ChatMsg*>(msg.pMsgBody.get());
@@ -93,30 +96,22 @@ void mainwindow::onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf)
         default:
             break;
     }
-    //XLOG(str, str.user.userName);
-    //m_chatHelper->PostMsg(this, msg.user.userName);
-    
-    //QString recvMsg = QString::fromLocal8Bit((char*)buf->data(), buf->size());
-    //if (recvMsg.size() == 1 && recvMsg.at(0) == 'h')
-    //{
-    //    // 心跳包
-    //    channel->write("s");
-    //    return;
-    //}
-
-    //m_chatHelper->PostMsg(this, recvMsg);
-    //// echo
-    // m_server->broadcast(recvMsg.toStdString());
 }
 
 void mainwindow::onConnection(const hv::SocketChannelPtr& channel)
 {
     QString state = channel->isConnected() ? "connected" : "disconnected";
     // 设置超时时间
-    //channel->setKeepaliveTimeout(60000);
+    channel->setKeepaliveTimeout(1500);
     m_chatHelper->PostMsg(this, QString("[Server] conn id: %1 %2")
         .arg(channel->id())
         .arg(state));
+}
+
+void mainwindow::LoginCheck(chaty::User _user)
+{
+    UserTableDAO dao;
+    dao.GetUser(_user.id);
 }
 
 void mainwindow::customEvent(QEvent* e)

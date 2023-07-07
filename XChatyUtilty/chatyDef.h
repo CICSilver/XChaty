@@ -38,19 +38,36 @@ namespace
 #define PrintString(a)  qUtf8Printable(a)
 #define PrintChinese(a) PrintString(CURRENT_TR(a))
 
+namespace chaty_client
+{
+	typedef enum RequestType
+	{
+		REQ_LOGIN = 0,
+		REQ_REGIST = 2,
+		REQ_CHAT = 4,
+		REQ_DEFAULT = 254,	
+		REQ_HB = 255	// Max of 8 bit unsigned
+	}ReqType;
+}// end of namespace chaty_client
+
+namespace chaty_server
+{
+	typedef enum ResponseType
+	{
+		RESP_LOGIN_OK = 0,
+		RESP_LOGIN_FAILED,
+		RESP_REGIST_OK,
+		RESP_REGIST_FAILED,
+		RESP_CHAT_OK,
+		RESP_CHAT_FAILED,
+		RESP_DEFAULT_OK = 254,
+		RESP_DEFAULT_FAILED = 255	// Max of 8 bit unsigned
+	};
+}// end of namespace chaty_server
+
 namespace chaty
 {
 	typedef int (*Callback)(void*, int, char**, char**);
-
-	enum ClientMsgType
-	{
-		MSG_LOGIN = 0,
-		MSG_REGIST,
-		MSG_CHAT,
-		MSG_HB,
-		MSG_ERR = 254,
-		MSG_DEFAULT = 255	// Max of 8 bit unsigned
-	};
 
 	typedef struct UserStruct
 	{
@@ -107,13 +124,10 @@ namespace chaty
 
 namespace protochat
 {
-
 	typedef struct MessageBase
 	{
-		MessageBase()
-		{
-			custom_msg = "";
-		}
+		MessageBase(QString customMsg = "")
+			:custom_msg(customMsg) {}
 		virtual ~MessageBase() {}
 
 		virtual std::unique_ptr<MessageBase> clone() = 0;
@@ -167,10 +181,9 @@ namespace protochat
 		int chatRoom;
 	}ChatMsg;
 
-	struct chatyHead
+	struct BaseHead
 	{
-		chatyHead(chaty::ClientMsgType _type = chaty::MSG_DEFAULT)
-			: msgType(_type)
+		BaseHead()
 		{
 			time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
 		}
@@ -178,27 +191,63 @@ namespace protochat
 		quint8 msgType;
 	};
 
+	struct chatyHead : public BaseHead
+	{
+		chatyHead(chaty_client::RequestType _type = chaty_client::REQ_DEFAULT)
+		{
+			this->msgType = _type;
+		}
+	};
+
+	typedef struct ResponseHead : public BaseHead
+	{
+		ResponseHead(chaty_server::ResponseType _type = chaty_server::RESP_DEFAULT_OK)
+		{
+			this->msgType = _type;
+		}
+	}RespHead;
+
+	typedef struct ResponseMessage : public BaseMsg
+	{
+		ResponseMessage()
+			:respHead() {}
+		ResponseMessage(chaty_server::ResponseType _type, QString custom_str= "")
+		{
+			this->respHead.msgType = _type;
+			this->custom_msg = custom_str;
+		}
+		std::unique_ptr<BaseMsg> clone() override
+		{
+			return std::make_unique<ResponseMessage>(*this);
+		}
+		ResponseHead respHead;
+	}RespMsg;
+
 	struct ChatyMessage
 	{
 		ChatyMessage()
 			:msgHead(), pMsgBody(Q_NULLPTR) {}
-		ChatyMessage(chaty::ClientMsgType _type, BaseMsg *msg_body)
+		ChatyMessage(chaty_client::RequestType _type, BaseMsg *msg_body = Q_NULLPTR)
 		{
 			msgHead.msgType = _type;
 			switch (_type)
 			{
-				case chaty::MSG_LOGIN:
-				case chaty::MSG_REGIST:
+				case chaty_client::REQ_LOGIN:
+				case chaty_client::REQ_REGIST:
 				{
-					LoginMsg* msg = dynamic_cast<LoginMsg*>(msg_body);
-					pMsgBody = std::make_unique<LoginMsg>(*msg);
+					RegistMsg* msg = dynamic_cast<RegistMsg*>(msg_body);
+					pMsgBody = std::make_unique<RegistMsg>(*msg);
 					break;
 				}
-				case chaty::MSG_CHAT:
+				case chaty_client::REQ_CHAT:
 				{
 					ChatMsg* msg = dynamic_cast<ChatMsg*>(msg_body);
 					pMsgBody = std::make_unique<ChatMsg>(*msg);
 					break;
+				}
+				case chaty_client::REQ_HB:
+				{
+					pMsgBody = nullptr;
 				}
 				default:
 					break;
@@ -210,7 +259,7 @@ namespace protochat
 		void Init()
 		{
 			pMsgBody = nullptr;
-			msgHead.msgType = chaty::MSG_DEFAULT;
+			msgHead.msgType = chaty_client::REQ_DEFAULT;
 			msgHead.time = "";
 		}
 		~ChatyMessage() {}
@@ -236,14 +285,14 @@ namespace protochat
 		stream << msg.msgHead;
 		switch (msg.msgHead.msgType)
 		{
-			case chaty::MSG_LOGIN:
-			case chaty::MSG_REGIST:
+			case chaty_client::REQ_LOGIN:
+			case chaty_client::REQ_REGIST:
 			{
 				XLOG("Login/Regist");
 				LoginMsg* login_msg = dynamic_cast<LoginMsg*>(msg.pMsgBody.get());
 				stream << login_msg->user << login_msg->custom_msg;
 			}
-			case chaty::MSG_CHAT:
+			case chaty_client::REQ_CHAT:
 			{
 				XLOG("Chat");
 				ChatMsg* chat_msg = dynamic_cast<ChatMsg*>(msg.pMsgBody.get());
@@ -276,15 +325,15 @@ namespace protochat
 		XLOG(msg.msgHead.msgType);
 		switch (msg.msgHead.msgType)
 		{
-			case chaty::MSG_LOGIN:
-			case chaty::MSG_REGIST:
+			case chaty_client::REQ_LOGIN:
+			case chaty_client::REQ_REGIST:
 			{
 				RegistMsg _msg_body;
 				stream >> _msg_body;
 				msg.pMsgBody = std::make_unique<RegistMsg>(_msg_body);
 				break;
 			}
-			case chaty::MSG_CHAT:
+			case chaty_client::REQ_CHAT:
 			{
 				ChatMsg _msg_body;
 				stream >> _msg_body;

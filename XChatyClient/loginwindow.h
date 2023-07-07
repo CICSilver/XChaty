@@ -14,7 +14,7 @@ public:
 	~LoginWindow();
 
 private:
-	void PostUserInfo(chaty::ClientMsgType msgType);
+	void PostUserInfo(chaty_client::RequestType msgType);
 
 public slots:
 	void OnLogin();
