@@ -16,6 +16,7 @@ mainwindow::mainwindow(QWidget *parent)
     ui.setupUi(this);
     m_server = nullptr;
     m_chatHelper = ChatWindowUtilty::GetInstance(ui.chatEdit);
+    m_userDao = new UserTableDAO;
     InitChatServer();
 
     auto StartServer = [this] ()
@@ -38,13 +39,13 @@ mainwindow::mainwindow(QWidget *parent)
     };
     StartServer();
     connect(ui.startBtn, &QPushButton::clicked, this, StartServer);
-    //QThreadPool::globalInstance()->start()
 }
 
 mainwindow::~mainwindow()
 {
     XLOG("~mainwindow()");
     SAFE_DELETE(m_server);
+    SAFE_DELETE(m_userDao);
 }
 
 void mainwindow::InitChatServer()
@@ -64,10 +65,8 @@ void mainwindow::InitChatServer()
 
 void mainwindow::onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf)
 {
-    QByteArray qbuffer((char*)buf->data(), buf->size());
-    XLOG(buf->size());
-    ChatyMessage msg = protochat::DeSerrialize(qbuffer);
-
+    ChatyMessage msg = protochat::ConvertBuf2ChatyMsg(buf);
+    if (!msg.pMsgBody) return;
     RespMsg response;
     switch (msg.msgHead.msgType)
     {
@@ -76,13 +75,19 @@ void mainwindow::onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf)
             // login request
             LoginMsg* login_msg = dynamic_cast<LoginMsg*>(msg.pMsgBody.get());
             
-            XLOG(login_msg->user.userName);
+            // default distribute to room 0
+            XLOG("user ip:", channel.get()->peeraddr());
+            chaty::User user = login_msg->user;
+            XLOG(user.id, user.passwd, user.userName);
             break;
         }
         case chaty_client::REQ_REGIST:
         {
             // regist request
             RegistMsg* reg_msg = dynamic_cast<RegistMsg*>(msg.pMsgBody.get());
+            chaty::User user = reg_msg->user;
+            XLOG(user.userName, user.passwd);
+            
             break;
         }
         case chaty_client::REQ_CHAT:

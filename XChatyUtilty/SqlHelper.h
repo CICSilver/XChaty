@@ -1,6 +1,6 @@
 #pragma once
 #include "sqlite3.h"
-#include "chatyDef.h"
+#include "XLog.h"
 #include "hv.h"
 #include <QString>
 #include <functional>

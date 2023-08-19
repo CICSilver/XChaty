@@ -99,15 +99,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="baseMsg.h" />
     <ClInclude Include="customevent.h" />
     <ClInclude Include="chatyDef.h" />
+    <ClInclude Include="FileTransportUtilty.h" />
+    <ClInclude Include="msgType.h" />
     <ClInclude Include="Protoc.h" />
     <ClInclude Include="SqlHelper.h" />
+    <ClInclude Include="UserModel.h" />
     <ClInclude Include="xchatyutilty_global.h" />
     <ClInclude Include="chatwindowutilty.h" />
+    <ClInclude Include="XLog.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="chatwindowutilty.cpp" />
+    <ClCompile Include="FileTransportUtilty.cpp" />
     <ClCompile Include="Protoc.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

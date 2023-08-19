@@ -48,7 +48,7 @@ bool XChatyClient::InitConnect()
     m_client->onMessage = [this](const hv::SocketChannelPtr& channel, hv::Buffer* buf)
     {
         QByteArray ba((char*)buf->data());
-        ChatyMsg msg = protochat::DeSerrialize(ba);
+        ChatyMsg msg = protoc::DeSerrialize(ba);
         ChatMsg* chat_msg = dynamic_cast<ChatMsg*>(msg.pMsgBody.get());
         m_chatHelper->PostMsg(this, chat_msg->chatMsg);
     };
@@ -61,8 +61,8 @@ bool XChatyClient::InitConnect()
         {
 			if (channel->isConnected()) 
 			{
-                ChatyMsg msg(chaty_client::REQ_HB);
-                QByteArray ba = protochat::Serrialize(msg);
+                ChatyMsg msg(protoc::REQ_HB);
+                QByteArray ba = protoc::Serrialize(msg);
 				channel->write(ba.constData(), ba.size());
 			}
 			else
@@ -104,9 +104,9 @@ void XChatyClient::SendMsg()
         chatMsg.chatMsg = ui.sendEdit->text();
         chatMsg.userName = m_user->userName;
         chatMsg.chatRoom = 0;
-        ChatyMsg msg(chaty_client::REQ_CHAT, &chatMsg);
+        ChatyMsg msg(protoc::REQ_CHAT, &chatMsg);
         XLOG(msg.msgHead.msgType);
-        QByteArray ba = protochat::Serrialize(msg);
+        QByteArray ba = protoc::Serrialize(msg);
         XLOG(ba.size());
 
         m_client->send(ba.constData(), ba.size());

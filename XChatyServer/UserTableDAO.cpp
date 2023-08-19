@@ -1,5 +1,6 @@
 #include "UserTableDAO.h"
-
+#include "XLog.h"
+#include "chatyDef.h"
 UserTableDAO::UserTableDAO()
 {
 	m_queryUserCB = [] (void* data, int argc, char** argv, char** colname) -> int

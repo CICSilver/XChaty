@@ -2,7 +2,7 @@
 
 #include <QWidget>
 #include "ui_regwindow.h"
-#include "chatyDef.h"
+#include "UserModel.h"
 
 class RegWindow : public QWidget
 {

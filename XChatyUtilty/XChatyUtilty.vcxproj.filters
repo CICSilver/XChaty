@@ -21,6 +21,15 @@
       <UniqueIdentifier>{639EADAA-A684-42e4-A9AD-28FC9BCB8F7C}</UniqueIdentifier>
       <Extensions>ts</Extensions>
     </Filter>
+    <Filter Include="MsgDef">
+      <UniqueIdentifier>{308bb273-a37a-4a90-96dd-d0578637a230}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XLog">
+      <UniqueIdentifier>{467f9fff-cfe8-4678-b74c-519ca9bde471}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Model">
+      <UniqueIdentifier>{dff68085-9dd2-4c10-b4d0-415024c51cac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="xchatyutilty_global.h">
@@ -38,8 +47,23 @@
     <ClInclude Include="SqlHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Protoc.h">
+    <ClInclude Include="FileTransportUtilty.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="msgType.h">
+      <Filter>MsgDef</Filter>
+    </ClInclude>
+    <ClInclude Include="baseMsg.h">
+      <Filter>MsgDef</Filter>
+    </ClInclude>
+    <ClInclude Include="Protoc.h">
+      <Filter>MsgDef</Filter>
+    </ClInclude>
+    <ClInclude Include="XLog.h">
+      <Filter>XLog</Filter>
+    </ClInclude>
+    <ClInclude Include="UserModel.h">
+      <Filter>Model</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -47,6 +71,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Protoc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileTransportUtilty.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

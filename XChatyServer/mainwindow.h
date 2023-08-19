@@ -3,10 +3,12 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_mainwindow.h"
 #include "TcpServer.h"
-#include "chatyDef.h"
 #include "connectinfo.h"
 #include "hv.h"
 #include "hsocket.h"
+#include "Protoc.h"
+
+class UserTableDAO;
 class ChatWindowUtilty;
 class mainwindow : public QMainWindow
 {
@@ -33,5 +35,6 @@ private:
     Ui::mainwindowClass ui;
     hv::TcpServer* m_server;
     ChatWindowUtilty* m_chatHelper;
-    QMap<QString, uint32_t>map; // <username, channel_id>
+    UserTableDAO* m_userDao;
+    QMap<quint32, QList<chaty::User>> m_chatRoomMap; // <channel_id, user_list>
 };

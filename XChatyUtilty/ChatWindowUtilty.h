@@ -7,7 +7,6 @@
 class XCHATYUTILTY_EXPORT ChatWindowUtilty
 {
 public:
-public:
 	static ChatWindowUtilty* GetInstance(QTextEdit* edit)
 	{
 		static ChatWindowUtilty instance(edit);

@@ -4,7 +4,7 @@
 #include "ui_xchatyclient.h"
 #include "TcpClient.h"
 #include "chatwindowutilty.h"
-#include "chatyDef.h"
+#include "Protoc.h"
 class XChatyClient : public QMainWindow
 {
     Q_OBJECT

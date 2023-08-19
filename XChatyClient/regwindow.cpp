@@ -1,4 +1,5 @@
 #include "regwindow.h"
+#include "XLog.h"
 #include <QMessageBox>
 #include <QCryptoGraphicHash>
 RegWindow::RegWindow(chaty::User* user, QWidget *parent)

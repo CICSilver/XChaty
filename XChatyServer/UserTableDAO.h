@@ -1,5 +1,5 @@
 #pragma once
-#include "chatyDef.h"
+#include "UserModel.h"
 #include "SqlHelper.h"
 class UserTableDAO
 {
