@@ -13,11 +13,11 @@ class ChatWindowUtilty;
 class mainwindow : public QMainWindow
 {
     Q_OBJECT
-    typedef protochat::ChatyMessage ChatyMessage;
-    typedef protochat::ChatMsg ChatMsg;
-    typedef protochat::LoginMsg LoginMsg;
-    typedef protochat::RegistMsg RegistMsg;
-    typedef protochat::RespMsg RespMsg;
+    typedef protoc::ChatyMessage ChatyMessage;
+    typedef protoc::ChatMsg ChatMsg;
+    typedef protoc::LoginMsg LoginMsg;
+    typedef protoc::RegistMsg RegistMsg;
+    typedef protoc::RespMsg RespMsg;
 public:
     mainwindow(QWidget *parent = nullptr);
     ~mainwindow();
@@ -30,7 +30,7 @@ private:
     void onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf);
     void onConnection(const hv::SocketChannelPtr& channel);
 
-    void LoginCheck(chaty::User _user);
+    bool LoginCheck(chaty::User _user);
 private:
     Ui::mainwindowClass ui;
     hv::TcpServer* m_server;

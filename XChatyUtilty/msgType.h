@@ -2,7 +2,7 @@
 #ifndef MSGTYPE_H
 #define MSGTYPE_H
 
-namespace protochat
+namespace protoc
 {
 	typedef enum RequestType
 	{
@@ -16,13 +16,13 @@ namespace protochat
 
 	enum ResponseType
 	{
-		RESP_LOGIN_OK = 0,
+		RESP_LOGIN_SUCCESS = 0,
 		RESP_LOGIN_FAILED,
-		RESP_REGIST_OK,
+		RESP_REGIST_SUCCESS,
 		RESP_REGIST_FAILED,
-		RESP_CHAT_OK,
+		RESP_CHAT_SUCCESS,
 		RESP_CHAT_FAILED,
-		RESP_DEFAULT_OK = 254,
+		RESP_DEFAULT_SUCCESS = 254,
 		RESP_DEFAULT_FAILED = 255	// Max of 8 bit unsigned
 	};
 }// end of namespace chaty_server

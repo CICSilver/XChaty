@@ -2,7 +2,7 @@
 #include <QDateTime>
 #include <memory>
 
-namespace protochat
+namespace protoc
 {
 	struct BaseHead
 	{

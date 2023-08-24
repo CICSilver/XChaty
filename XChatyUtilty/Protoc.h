@@ -8,8 +8,9 @@
 #include "baseMsg.h"
 #include "XLog.h"
 #include "hv.h"
+#include "Buffer.h"
 // ========================== MSG ==========================
-namespace protochat
+namespace protoc
 {
 	typedef struct LoginMsg : public BaseMsg
 	{
@@ -61,7 +62,7 @@ namespace protochat
 
 	struct chatyHead : public BaseHead
 	{
-		chatyHead(chaty_client::RequestType _type = chaty_client::REQ_DEFAULT)
+		chatyHead(protoc::RequestType _type = protoc::REQ_DEFAULT)
 		{
 			this->msgType = _type;
 		}
@@ -69,7 +70,7 @@ namespace protochat
 
 	typedef struct ResponseHead : public BaseHead
 	{
-		ResponseHead(chaty_server::ResponseType _type = chaty_server::RESP_DEFAULT_OK)
+		ResponseHead(protoc::ResponseType _type = protoc::RESP_DEFAULT_SUCCESS)
 		{
 			this->msgType = _type;
 		}
@@ -79,7 +80,7 @@ namespace protochat
 	{
 		ResponseMessage()
 			:respHead() {}
-		ResponseMessage(chaty_server::ResponseType _type, QString custom_str = "")
+		ResponseMessage(protoc::ResponseType _type, QString custom_str = "")
 		{
 			this->respHead.msgType = _type;
 		}
@@ -94,25 +95,25 @@ namespace protochat
 	{
 		ChatyMessage()
 			:msgHead(), pMsgBody(Q_NULLPTR) {}
-		ChatyMessage(chaty_client::RequestType _type, BaseMsg* msg_body = Q_NULLPTR)
+		ChatyMessage(protoc::RequestType _type, BaseMsg* msg_body = Q_NULLPTR)
 		{
 			msgHead.msgType = _type;
 			switch (_type)
 			{
-				case chaty_client::REQ_LOGIN:
-				case chaty_client::REQ_REGIST:
+				case protoc::REQ_LOGIN:
+				case protoc::REQ_REGIST:
 				{
 					RegistMsg* msg = dynamic_cast<RegistMsg*>(msg_body);
 					pMsgBody = std::make_unique<RegistMsg>(*msg);
 					break;
 				}
-				case chaty_client::REQ_CHAT:
+				case protoc::REQ_CHAT:
 				{
 					ChatMsg* msg = dynamic_cast<ChatMsg*>(msg_body);
 					pMsgBody = std::make_unique<ChatMsg>(*msg);
 					break;
 				}
-				case chaty_client::REQ_HB:
+				case protoc::REQ_HB:
 				{
 					pMsgBody = nullptr;
 				}
@@ -126,7 +127,7 @@ namespace protochat
 		void Init()
 		{
 			pMsgBody = nullptr;
-			msgHead.msgType = chaty_client::REQ_DEFAULT;
+			msgHead.msgType = protoc::REQ_DEFAULT;
 			msgHead.time = "";
 		}
 		~ChatyMessage() {}
@@ -136,7 +137,7 @@ namespace protochat
 }
 
 // ========================== Serilize/Unserilize ==========================
-namespace protochat 
+namespace protoc 
 {
 	// –Ú¡–ªØ
 	static QDataStream& operator<<(QDataStream& stream, const ClientMessage& msg) {
@@ -156,18 +157,20 @@ namespace protochat
 		stream << msg.msgHead;
 		switch (msg.msgHead.msgType)
 		{
-			case chaty_client::REQ_LOGIN:
-			case chaty_client::REQ_REGIST:
+			case protoc::REQ_LOGIN:
+			case protoc::REQ_REGIST:
 			{
 				XLOG("Login/Regist");
 				LoginMsg* login_msg = dynamic_cast<LoginMsg*>(msg.pMsgBody.get());
 				stream << login_msg->user;
+				break;
 			}
-			case chaty_client::REQ_CHAT:
+			case protoc::REQ_CHAT:
 			{
 				XLOG("Chat");
 				ChatMsg* chat_msg = dynamic_cast<ChatMsg*>(msg.pMsgBody.get());
 				stream << chat_msg->userName << chat_msg->chatMsg << chat_msg->chatRoom;
+				break;
 			}
 			default:
 				break;
@@ -196,15 +199,15 @@ namespace protochat
 		XLOG(msg.msgHead.msgType);
 		switch (msg.msgHead.msgType)
 		{
-			case chaty_client::REQ_LOGIN:
-			case chaty_client::REQ_REGIST:
+			case protoc::REQ_LOGIN:
+			case protoc::REQ_REGIST:
 			{
 				RegistMsg _msg_body;
 				stream >> _msg_body;
 				msg.pMsgBody = std::make_unique<RegistMsg>(_msg_body);
 				break;
 			}
-			case chaty_client::REQ_CHAT:
+			case protoc::REQ_CHAT:
 			{
 				ChatMsg _msg_body;
 				stream >> _msg_body;
@@ -217,7 +220,7 @@ namespace protochat
 		return stream;
 	}
 
-	static QByteArray Serrialize(protochat::ChatyMessage msg)
+	static QByteArray Serrialize(protoc::ChatyMessage msg)
 	{
 		QByteArray buffer;
 		QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -225,11 +228,11 @@ namespace protochat
 		XLOG(msg.msgHead.msgType);
 		return buffer;
 	};
-	static protochat::ChatyMessage DeSerrialize(const QByteArray& ba)
+	static protoc::ChatyMessage DeSerrialize(const QByteArray& ba)
 	{
 		QByteArray _temp_ba(ba);
 		QDataStream stream(&_temp_ba, QIODevice::ReadOnly);
-		protochat::ChatyMessage msg;
+		protoc::ChatyMessage msg;
 		msg.Init();
 		stream >> msg;
 		return msg;
@@ -237,13 +240,13 @@ namespace protochat
 }
 
 // ========================== msg funcs ====================================
-namespace protochat
+namespace protoc
 {
 	// convert from hv::Buffer to ChatyMessage
 	static ChatyMessage ConvertBuf2ChatyMsg(hv::Buffer* buf)
 	{
 		QByteArray qbuffer((char*)buf->data(), buf->size());
-		ChatyMessage msg = protochat::DeSerrialize(qbuffer);
+		ChatyMessage msg = protoc::DeSerrialize(qbuffer);
 		return msg;
 	}
 }

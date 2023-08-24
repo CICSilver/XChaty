@@ -31,7 +31,7 @@ public:
 
 	static void onResp(const hv::TcpClient::TSocketChannelPtr& channel, hv::Buffer* buffer);
 private:
-	void PostUserInfo(chaty_client::ReqType _msgType = chaty_client::REQ_LOGIN);
+	void PostUserInfo(protoc::ReqType _msgType = protoc::REQ_LOGIN);
 public slots:
 	void OnLogin();
 private:

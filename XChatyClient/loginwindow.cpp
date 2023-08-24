@@ -41,18 +41,33 @@ LoginWindow::~LoginWindow()
 
 void LoginWindow::onResp(const hv::TcpClient::TSocketChannelPtr& channel, hv::Buffer* buffer)
 {
+	XLOG("onResponse");
 	protoc::ChatyMessage msg = protoc::ConvertBuf2ChatyMsg(buffer);
 	if (!msg.pMsgBody) XERR("Response Error, response type:", msg.msgHead.msgType);
 	switch (msg.msgHead.msgType)
 	{
-		case protoc::RESP_LOGIN_OK:
+		case protoc::RESP_LOGIN_SUCCESS:
 		{
-
+			XLOG("LOGIN_SUCCESS");
 			break;
 		}
 		case protoc::RESP_LOGIN_FAILED:
-		case protoc::RESP_REGIST_OK:
+		{
+			XLOG("LOGIN_FAILED");
+			break;
+		}
+		case protoc::RESP_REGIST_SUCCESS:
+		{
+			XLOG("REGIST_SUCCESS");
+			break;
+		}
 		case protoc::RESP_REGIST_FAILED:
+		{
+			XLOG("REGIST_FAILED");
+			break;
+		}
+		default:
+			break;
 	}
 }
 

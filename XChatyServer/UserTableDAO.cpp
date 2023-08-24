@@ -34,7 +34,7 @@ void UserTableDAO::InsertUser(QString& name, QString& passwd)
 
 chaty::User* UserTableDAO::GetUser(const QString name)
 {
-	chaty::User* pUser = new chaty::User;
+	chaty::User* pUser = nullptr;
 	auto helper = SqlHelper::GetInstance();
 	helper->Open(CHATY_DB_NAME);
 	helper->Query("UserTable", "id,name,passwd", QString("name = %1").arg(name), pUser, m_queryUserCB);

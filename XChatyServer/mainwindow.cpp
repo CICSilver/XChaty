@@ -18,7 +18,7 @@ mainwindow::mainwindow(QWidget *parent)
     m_chatHelper = ChatWindowUtilty::GetInstance(ui.chatEdit);
     m_userDao = new UserTableDAO;
     InitChatServer();
-
+    ui.startBtn->setEnabled(false);
     auto StartServer = [this] ()
     {
         QString port = ui.portEdit->text();
@@ -65,32 +65,34 @@ void mainwindow::InitChatServer()
 
 void mainwindow::onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf)
 {
-    ChatyMessage msg = protochat::ConvertBuf2ChatyMsg(buf);
+    ChatyMessage msg = protoc::ConvertBuf2ChatyMsg(buf);
     if (!msg.pMsgBody) return;
     RespMsg response;
     switch (msg.msgHead.msgType)
     {
-        case chaty_client::REQ_LOGIN:
+        case protoc::REQ_LOGIN:
         {
             // login request
             LoginMsg* login_msg = dynamic_cast<LoginMsg*>(msg.pMsgBody.get());
-            
             // default distribute to room 0
             XLOG("user ip:", channel.get()->peeraddr());
             chaty::User user = login_msg->user;
             XLOG(user.id, user.passwd, user.userName);
+            protoc::ResponseType respType = LoginCheck(login_msg->user)? 
+                protoc::RESP_LOGIN_SUCCESS : 
+                protoc::RESP_LOGIN_FAILED;
+            response.respHead.msgType = protoc::RESP_LOGIN_SUCCESS;
             break;
         }
-        case chaty_client::REQ_REGIST:
+        case protoc::REQ_REGIST:
         {
             // regist request
             RegistMsg* reg_msg = dynamic_cast<RegistMsg*>(msg.pMsgBody.get());
             chaty::User user = reg_msg->user;
             XLOG(user.userName, user.passwd);
-            
             break;
         }
-        case chaty_client::REQ_CHAT:
+        case protoc::REQ_CHAT:
         {
             // chat request
             ChatMsg* chat_msg = dynamic_cast<ChatMsg*>(msg.pMsgBody.get());
@@ -101,6 +103,7 @@ void mainwindow::onMsg(const hv::SocketChannelPtr& channel, hv::Buffer* buf)
         default:
             break;
     }
+    
 }
 
 void mainwindow::onConnection(const hv::SocketChannelPtr& channel)
@@ -113,10 +116,20 @@ void mainwindow::onConnection(const hv::SocketChannelPtr& channel)
         .arg(state));
 }
 
-void mainwindow::LoginCheck(chaty::User _user)
+bool mainwindow::LoginCheck(chaty::User _user)
 {
     UserTableDAO dao;
-    dao.GetUser(_user.id);
+    chaty::User* pUser = dao.GetUser(_user.id);
+    if (pUser)
+    {
+        XLOG(pUser->userName);
+    }
+    else
+    {
+        XLOG("user not exists");
+    }
+
+    return true;
 }
 
 void mainwindow::customEvent(QEvent* e)
